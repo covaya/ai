@@ -1,0 +1,56 @@
+import requests
+import json
+from requests_oauthlib import OAuth1Session
+
+#取得したkeyを以下で定義する
+access_token = '160152805-ehvGbIt7DAONwtihGlitNtWFEmxb3jslYKcmehF8'
+access_token_secret = '2g89uuwJdn54YtRRrKTzdDQZIT93uRsNGWVcrPqOpSUJk'
+consumer_key = 'pw8PfrQc7cm9A9bbUGNlZ69ej'
+consumer_key_secret = '4Ho7zLfDGM0e1nhgKzjMEEvJAXkYy5u4FBpE8V6TTwNQsN05vZ'
+
+# タイムライン取得用のURL
+url = "https://api.twitter.com/1.1/statuses/user_timeline.json"
+
+#パラメータの定義
+params = {'screen_name':'covayaaaaaaa',
+          'exclude_replies':True,
+          'include_rts':False,
+          'count':200}
+
+#APIの認証
+twitter = OAuth1Session(consumer_key, consumer_key_secret, access_token, access_token_secret)
+
+#リクエストを投げる
+res = twitter.get(url, params = params)
+
+f_out = open('C:/Users/covaya/Desktop/python/twitter/test.txt','w',encoding="utf-8_sig")
+
+for j in range(100):
+    res = twitter.get(url, params = params)
+
+    if res.status_code == 200:
+
+        # API残り
+        limit = res.headers['x-rate-limit-remaining']
+        print ("API remain: " + limit)
+        if limit == 1:
+            sleep(60*15)
+
+        n = 0
+        timeline = json.loads(res.text)
+        # 各ツイートの本文を表示
+        for i in range(len(timeline)):
+            if i != len(timeline)-1:
+                f_out.write(timeline[i]['text'])
+            else:
+                f_out.write(timeline[i]['text'] + '\n')
+        # 一番最後のツイートIDをパラメータmax_idに追加
+                params['max_id'] = timeline[i]['id']-1
+
+f_out.close()
+
+-------------------------------------------------------------
+
+L34:
+res.headers['x-rate-limit-remaining']で残りリクエスト回数を取得。
+Twitterは15分ごとのリスエスト回数制限がある。
